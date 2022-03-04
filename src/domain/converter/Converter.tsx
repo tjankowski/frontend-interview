@@ -48,6 +48,7 @@ function Converter() {
         label="Amount"
         onChange={(value) => setAmount(value)}
         value={amount}
+        helpMessage="Please put amount of money that you would like convert"
       />
       <CurrenciesContainer>
         <Input
@@ -55,22 +56,18 @@ function Converter() {
           label="From Currency"
           onChange={(value) => setFromCurrency(value.toUpperCase())}
           value={fromCurrency}
-          errorMessage={
-            fromCurrency.length >= 3 && !isCurrency(fromCurrency, currencies)
-              ? "Currency is not supported"
-              : undefined
+          isValid={
+            fromCurrency.length < 3 || isCurrency(fromCurrency, currencies)
           }
+          errorMessage="Currency is not supported"
         />
         <Input
           name="to-currency"
           label="To Currency"
           onChange={(value) => setToCurrency(value.toUpperCase())}
           value={toCurrency}
-          errorMessage={
-            toCurrency.length >= 3 && !isCurrency(toCurrency, currencies)
-              ? "Currency is not supported"
-              : undefined
-          }
+          isValid={toCurrency.length < 3 || isCurrency(toCurrency, currencies)}
+          errorMessage="Currency is not supported"
         />
       </CurrenciesContainer>
       <Button disabled={!isValid} onClick={convertAmount}>
