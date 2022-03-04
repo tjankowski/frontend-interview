@@ -1,18 +1,22 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import ErrorMessage from "../../components/ErrorMessage";
-import { Currencies, CurrencyCodes, RatesForCurrency } from "../../types";
+import { Currencies, RatesForCurrency } from "../../types";
 import { rates as getRates } from "./api/api";
 import RatesTable from "./ui/RatesTable";
 
 const currencies = Object.keys(Currencies);
 
-function Rates() {
-  const selectRef = useRef<HTMLSelectElement>(null);
+interface Props {
+  updatesInterval: number;
+}
+
+function Rates({ updatesInterval }: Props) {
   const [rates, setRates] = useState<RatesForCurrency | null>(null);
+  const [currency, setCurrency] = useState(currencies[0]);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const fetchRate = useCallback(async (currency) => {
+  const fetchRates = useCallback(async (currency) => {
     try {
       const result = await getRates(currency);
       setRates(result.rates);
@@ -22,23 +26,26 @@ function Rates() {
   }, []);
 
   useEffect(() => {
-    const fetchRates = async () => {
-      if (selectRef.current == null) {
-        return;
-      }
-      fetchRate(selectRef.current.value as CurrencyCodes);
-    };
-    fetchRates();
-  }, [fetchRate]);
+    fetchRates(currency);
+    const intervalId = setInterval(() => {
+      fetchRates(currency);
+    }, 1000 * updatesInterval);
+    return () => {clearInterval(intervalId)};
+  }, [currency, fetchRates, updatesInterval]);
 
   const onChange = async (event: any) => {
-    fetchRate(event.target.value);
+    setCurrency(event.target.value);
+    setRates(null);
   };
 
   return (
     <Container>
       <Header>Current Exchange Rates</Header>
-      <Select data-testid="currency-select" ref={selectRef} onChange={onChange}>
+      <Select
+        data-testid="currency-select"
+        value={currency}
+        onChange={onChange}
+      >
         {currencies.map((currency) => (
           <option key={currency} value={currency}>
             {currency}
@@ -46,7 +53,12 @@ function Rates() {
         ))}
       </Select>
       <ErrorMessage message={errorMessage} />
-      {rates && <RatesTable data-testid="rates-table" rates={rates} />}
+      {rates && (
+        <RatesTable
+          data-testid="rates-table"
+          rates={rates}
+        />
+      )}
     </Container>
   );
 }

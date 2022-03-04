@@ -15,7 +15,7 @@ function App() {
       <ContentContainer>
         <ConverterContainer>
           <Converter />
-          <Rates />
+          <Rates updatesInterval={30} />
         </ConverterContainer>
       </ContentContainer>
     </div>

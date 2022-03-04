@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import { RatesForCurrency } from "../../../types";
+import { CurrencyCodes, RatesForCurrency } from "../../../types";
+import { usePrevious } from "../hooks/usePrevious";
 
 interface Props {
   rates: RatesForCurrency;
@@ -8,6 +9,9 @@ interface Props {
 }
 
 const RatesTable: React.FC<Props> = (props) => {
+  const { rates } = props;
+  const history = usePrevious(rates);
+
   return (
     <Table data-testid={props["data-testid"]}>
       <thead>
@@ -17,10 +21,20 @@ const RatesTable: React.FC<Props> = (props) => {
         </tr>
       </thead>
       <tbody>
-        {Object.entries(props.rates).map(([currency, value]) => (
-          <tr key={currency}>
-            <td>{currency}</td>
-            <td>{value.toFixed(2)}</td>
+        {Object.entries(rates).map(([key, value]) => (
+          <tr key={key}>
+            <td>{key}</td>
+            <td>
+              <Value
+                change={
+                  history != null 
+                    ? value - history[key as CurrencyCodes]
+                    : 0
+                }
+              >
+                {value.toFixed(2)}
+              </Value>
+            </td>
           </tr>
         ))}
       </tbody>
@@ -54,5 +68,11 @@ const Table = styled.table`
     }
   }
 
+`;
+
+const Value = styled.span<{ change: number }>`
+  transition: color 0.5s ease;
+  color: ${({ change }) =>
+    change > 0 ? "green" : change < 0 ? "red" : "black"};
 `;
 export default RatesTable;

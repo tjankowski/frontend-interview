@@ -1,23 +1,21 @@
 import React from "react";
-import {
-  act,
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  findByTestId,
-} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Rates from "./Rates";
 import { CurrencyCodes } from "../../types";
 import { generateMockRates } from "../../utils/testUtils";
 
 const rates = generateMockRates();
 const mockRates = jest.fn();
+const INTERVAL_SECONDS = 5;
 
+jest.useFakeTimers();
 jest.mock("./api/api", () => ({
   ...jest.requireActual("./api/api"),
   rates: (currency: CurrencyCodes) => mockRates(currency),
 }));
+
+const renderComponent = () =>
+  render(<Rates updatesInterval={INTERVAL_SECONDS} />);
 
 describe("Converter", () => {
   beforeEach(() => {
@@ -26,7 +24,7 @@ describe("Converter", () => {
   it("should fetch rates on mounting", async () => {
     mockRates.mockImplementationOnce(() => ({ rates }));
     await waitFor(() => {
-      render(<Rates />);
+      renderComponent();
     });
 
     expect(mockRates).toBeCalledTimes(1);
@@ -39,7 +37,7 @@ describe("Converter", () => {
       throw new Error("test error");
     });
     await waitFor(() => {
-      render(<Rates />);
+      renderComponent();
     });
 
     expect(mockRates).toBeCalledTimes(1);
@@ -50,7 +48,7 @@ describe("Converter", () => {
   it("should refetch data on change", async () => {
     mockRates.mockImplementation(() => ({ rates }));
     await waitFor(() => {
-      render(<Rates />);
+      renderComponent();
     });
 
     fireEvent.change(screen.getByTestId("currency-select"), {
@@ -64,5 +62,24 @@ describe("Converter", () => {
     expect(mockRates).toBeCalledTimes(2);
     expect(mockRates).toBeCalledWith(Object.keys(rates)[0]);
     expect(mockRates).toBeCalledWith(Object.keys(rates)[1]);
+  });
+
+  it("should refetch after interval", async () => {
+    mockRates.mockImplementationOnce(() => ({ rates }));
+    await waitFor(() => {
+      renderComponent();
+    });
+
+    expect(mockRates).toBeCalledTimes(1);
+    expect(mockRates).toBeCalledWith(Object.keys(rates)[0]);
+
+    jest.advanceTimersByTime(1000 * (INTERVAL_SECONDS + 1));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("rates-table")).toBeVisible();
+    });
+
+    expect(mockRates).toBeCalledTimes(2);
+    expect(mockRates).toBeCalledWith(Object.keys(rates)[0]);
   });
 });
