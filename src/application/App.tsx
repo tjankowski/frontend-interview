@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { ReactComponent as Logo } from "../assets/logo.svg";
 import { palette } from "../styles";
 import Converter from "../domain/converter/Converter";
+import Rates from "../domain/rates/Rates";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <ContentContainer>
         <ConverterContainer>
           <Converter />
+          <Rates />
         </ConverterContainer>
       </ContentContainer>
     </div>
