@@ -1,17 +1,23 @@
 import React from "react";
 import styled from "styled-components";
+import { palette } from "../styles";
 
 type Props = {
+  disabled: boolean;
   children: React.ReactNode;
   onClick: () => void;
 };
 
-const Button: React.FC<Props> = ({ children, onClick }) => {
-  return <StyledButton onClick={onClick}>{children}</StyledButton>;
+const Button: React.FC<Props> = ({ disabled, children, onClick }) => {
+  return (
+    <StyledButton disabled={disabled} onClick={onClick}>
+      {children}
+    </StyledButton>
+  );
 };
 
 const StyledButton = styled.button`
-  background-color: #0815ff;
+  background-color: ${(props) => (props.disabled ? "LightGray" : palette.blue)};
   padding: 12px 8px;
   width: 100%;
   border-radius: 4px;
