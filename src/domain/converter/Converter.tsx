@@ -5,6 +5,8 @@ import { Currencies, CurrencyCodes } from "../../types";
 import { isCurrency, isPositiveNumber } from "../../utils/utils";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
+import { useHistory } from "./hooks/useHistory";
+import History from "./ui/History";
 
 const currencies = Object.keys(Currencies);
 
@@ -13,6 +15,7 @@ function Converter() {
   const [fromCurrency, setFromCurrency] = useState("");
   const [toCurrency, setToCurrency] = useState("");
   const [convertedAmount, setConvertedAmount] = useState("");
+  const { history, addToHistory } = useHistory();
 
   const convertAmount = async () => {
     try {
@@ -20,6 +23,12 @@ function Converter() {
         fromCurrency as CurrencyCodes,
         toCurrency as CurrencyCodes,
         Number(amount)
+      );
+      addToHistory(
+        Number(amount),
+        fromCurrency as CurrencyCodes,
+        toCurrency as CurrencyCodes,
+        Number(result.convertedAmount)
       );
       setConvertedAmount(result.convertedAmount);
     } catch (expcetion) {
@@ -75,6 +84,7 @@ function Converter() {
           readOnly={true}
         />
       )}
+      <History history={history} />
     </div>
   );
 }

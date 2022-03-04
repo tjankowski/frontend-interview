@@ -47,6 +47,7 @@
     ]
   },
   "devDependencies": {
+    "@testing-library/react-hooks": "^7.0.2",
     "@types/styled-components": "^5.1.11",
     "jest-fetch-mock": "^3.0.3"
   }
